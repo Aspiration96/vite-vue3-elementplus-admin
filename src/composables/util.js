@@ -1,0 +1,47 @@
+import { ElNotification,ElMessageBox } from 'element-plus';
+import nprogress from 'nprogress';
+
+
+//请求提示
+export function toast(message,type = "success",dangerouslyUseHTMLString = false) {
+    ElNotification({
+        message,
+        type,
+        dangerouslyUseHTMLString,
+        duration:3000
+    });
+}
+
+//弹窗提示确定还是取消
+export function showModal(content="提示内容",type="warning",title=""){
+    return ElMessageBox.confirm(
+        content,
+        title,
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type,
+          roundButton: true,
+        },
+      )
+}
+
+//弹出输入框
+export function showPrompt(tip,value = "") {
+  return ElMessageBox.prompt(tip, "", {
+    confirmButtonText: "确认",
+    cancelButtonText: "取消",
+    inputValue:value
+  });
+}
+
+//显示全屏loading
+export function showFullLoading(){
+    nprogress.start();
+}
+
+//隐藏全屏loading
+export function hideFullLoading(){
+    nprogress.done();
+}
+
