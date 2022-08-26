@@ -2,7 +2,7 @@
   <el-card shadow="never" class="border-0">
     <!-- 新增|刷新 -->
     <div class="flex items-center justify-between mb-4">
-      <el-button type="primary" size="small">新增</el-button>
+      <el-button type="primary" size="small" @click="handleCreate">新增</el-button>
       <el-tooltip effect="dark" content="刷新数据" placement="top">
         <el-button text @click="getData">
           <el-icon :size="20">
@@ -32,11 +32,26 @@
         <el-pagination background layout="prev, pager ,next" :total="total" :current-page="currentPage" :page-size="limit" @current-change="getData"/>
     </div>
 
+    <FormDrawer ref="formDrawerRef" title="新增" @submit="handleSubmit">
+      <el-form :model="form" ref="formRef" :rules="rules" label-width="80px" :inline="false">
+        <el-form-item label="公告标题" prop="title">
+          <el-input v-model="form.title" placeholder="公告标题"></el-input>
+        </el-form-item>
+        <el-form-item label="公告内容" prop="content">
+          <el-input v-model="form.content" placeholder="公告内容" type="textarea" :rows="5"></el-input>
+        </el-form-item>
+      </el-form>
+      
+
+    </FormDrawer>
+
   </el-card>
 </template>
 <script setup>
-import { ref } from "vue";
-import { getNoticeList } from "~/api/notice";
+import { ref,reactive } from "vue";
+import { getNoticeList,createNotice } from "~/api/notice";
+import FormDrawer from "~/components/FormDrawer.vue";
+import { toast } from '~/composables/util';
 const tableData = ref([])
 const loading = ref(false)
 
@@ -67,6 +82,48 @@ getData()
 // 删除
 const handleDelete = (id)=>{
 
+}
+
+//表单部分
+const formDrawerRef = ref(null);
+const formRef = ref(null);
+const form = reactive({
+  title:'',
+  content:''
+})
+
+const rules = {
+  title:[{
+        required: true,
+        message: '公告标题不能为空',
+        trigger: 'blur'
+    }],
+  content:[{
+        required: true,
+        message: '公告内容不能为空',
+        trigger: 'blur'
+    }]
+}
+//确认新增
+const handleSubmit = ()=>{
+  formRef.value.validate((validate)=>{
+    if(!validate) return
+    formDrawerRef.value.showLoading();
+    createNotice(form).then(res=>{
+      toast("新增成功");
+      getData(1);
+      formDrawerRef.value.close();
+      form.title='';
+      form.content='';
+    }).finally(()=>{
+      formDrawerRef.value.hideLoading();
+    })
+  })
+}
+
+//打开新增表单
+const handleCreate = ()=>{
+  formDrawerRef.value.open();
 }
 
 </script>
